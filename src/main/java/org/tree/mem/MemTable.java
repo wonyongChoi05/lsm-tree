@@ -1,29 +1,33 @@
 package org.tree.mem;
 
-import org.tree.sst.SortedStringTable;
+import org.tree.sst.SortedStringTables;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
 public class MemTable {
 
-    private final ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
-    private final SortedStringTable sst = new SortedStringTable();
+    private final ByteBuffer byteBuffer;
+    private final SortedStringTables ssts;
 
-    public MemTable() throws FileNotFoundException {
+    public MemTable() {
+        this.byteBuffer = ByteBuffer.allocate(1024);
+        this.ssts = new SortedStringTables();
     }
 
-    public void setByteBuffer(byte[] data) {
+    public void appendToBuffer(byte[] data) {
         byteBuffer.put(data);
     }
 
     public void flush() throws IOException {
-        byteBuffer.flip();
         while (byteBuffer.hasRemaining()) {
-            sst.write(byteBuffer);
+            ssts.flush(byteBuffer);
         }
         byteBuffer.clear();
+    }
+
+    public void enableAutoCompaction() {
+        ssts.runAutoCompacting();
     }
 
 }
